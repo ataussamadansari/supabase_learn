@@ -16,9 +16,34 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final supabase = Supabase.instance.client;
   File? pickedFile;
+  bool isLoading = false;
+
+  uploadImage() async {
+    try {
+      String fileName = DateTime.now().microsecondsSinceEpoch.toString();
+      String ext = pickedFile!.path.split('.').last;
+      setState(() {
+        isLoading = true;
+      });
+
+      final result = await supabase.storage.from('bucket1').upload(
+          '$fileName.$ext',
+          pickedFile!
+      );
+      debugPrint("Result: $result");
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.widthOf(context);
+    final height = MediaQuery.heightOf(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Home Screen"),
@@ -44,8 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            pickedFile == null ? SizedBox() :
-            Image.file(pickedFile!),
+            pickedFile == null
+                ? SizedBox()
+                : Image.file(pickedFile!, height: height * 0.4),
             ElevatedButton(
               onPressed: () async {
                 final result = await ImagePicker().pickImage(
@@ -57,8 +83,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 }
               },
-              child: Text("Pick File"),
+              child: Text("Pick Image"),
             ),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: () {
+              uploadImage();
+            }, child: Text("Upload Image")),
           ],
         ),
       ),
