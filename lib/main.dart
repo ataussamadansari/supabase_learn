@@ -12,7 +12,6 @@ void main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-
   runApp(const MyApp());
 }
 

@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../home/home_screen.dart';
+import 'package:supabase_learn/screens/many_to_many/main/main_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,14 +12,8 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final nameCtr = TextEditingController();
   final emailCtr = TextEditingController();
-  final countryCtr = TextEditingController();
-  final cityCtr = TextEditingController();
-  final streetCtr = TextEditingController();
-  final pinCodeCtr = TextEditingController();
-  final phoneCtr = TextEditingController();
   final passwordCtr = TextEditingController();
   bool loading = false;
-  File? profilePic;
   final supabase = Supabase.instance.client;
 
   register() async {
@@ -38,35 +28,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (result.user != null && result.session != null) {
-        await supabase.storage
-            .from('bucket1')
-            .upload('users/${result.user!.id}', profilePic!);
 
-        String url = supabase.storage
-            .from('bucket1')
-            .getPublicUrl('users/${result.user!.id}');
-        /*String url1 = await supabase.storage
-            .from('bucket1')
-            .createSignedUrl('users/${result.user!.id}', 60);*/
-        debugPrint("URL: $url");
-
-        await supabase.from('users').insert({
+        await supabase.from('students').insert({
           'name': nameCtr.text.trim(),
           'email': emailCtr.text.trim().toLowerCase(),
-          'phone': phoneCtr.text.trim(),
-          'profile_pic': url,
-        });
-
-        await supabase.from('addresses').insert({
-          'country': countryCtr.text.trim(),
-          'city': cityCtr.text.trim(),
-          'street': streetCtr.text.trim(),
-          'pin_code': pinCodeCtr.text.trim(),
         });
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
           (context) => false,
         );
       }
@@ -88,42 +58,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
-          Center(
-            child: Stack(
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundImage: profilePic == null
-                      ? AssetImage('assets/images/user.png') as ImageProvider
-                      : FileImage(profilePic!),
-                ),
-                Positioned(
-                  bottom: -5,
-                  right: -5,
-                  child: IconButton(
-                    onPressed: () async {
-                      final result = await ImagePicker().pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (result != null) {
-                        setState(() {
-                          profilePic = File(result.path);
-                        });
-                      }
-                    },
-                    icon: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.add, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12),
           TextFormField(
             controller: nameCtr,
             decoration: InputDecoration(hintText: "Name"),
@@ -132,32 +66,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           TextFormField(
             controller: emailCtr,
             decoration: InputDecoration(hintText: "Email"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: countryCtr,
-            decoration: InputDecoration(hintText: "Country"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: cityCtr,
-            decoration: InputDecoration(hintText: "City"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: streetCtr,
-            decoration: InputDecoration(hintText: "Street"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: pinCodeCtr,
-            maxLength: 6,
-            decoration: InputDecoration(hintText: "Pin Code"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: phoneCtr,
-            decoration: InputDecoration(hintText: "Phone"),
           ),
           SizedBox(height: 12),
           TextFormField(

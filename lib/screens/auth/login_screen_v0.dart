@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_learn/screens/auth/sign_up_screen.dart';
-import 'package:supabase_learn/screens/many_to_many/main/main_screen.dart';
+import 'package:supabase_learn/screens/main/main_screen.dart';
 
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

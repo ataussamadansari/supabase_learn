@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_learn/screens/auth/login_screen.dart';
-import 'package:supabase_learn/screens/main/main_screen.dart';
+import 'package:supabase_learn/screens/many_to_many/main/main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
