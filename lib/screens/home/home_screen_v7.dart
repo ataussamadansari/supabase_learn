@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+
   // --- Logic: Add Product ---
   Future<void> addProduct() async {
     if (productName.text.isEmpty || selectedCategoryId == null) return;
@@ -85,10 +86,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 20),
 
+                // --- Global Dropdown (No StreamBuilder needed here) ---
                 isCategoriesLoading
                     ? const LinearProgressIndicator()
                     : DropdownButtonFormField<int>(
-                  initialValue: selectedCategoryId,
+                  value: selectedCategoryId,
                   hint: const Text("Select Category"),
                   items: categories.map((cat) {
                     return DropdownMenuItem<int>(
@@ -118,6 +120,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String getCategoryName(int? categoryId) {
+    final category = categories.firstWhere(
+          (cat) => cat['id'] == categoryId,
+      orElse: () => {'name': 'Unknown'}, // Agar na mile toh
+    );
+    return category['name'];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,62 +136,42 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: showAddProductSheet,
         child: const Icon(Icons.add),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: supabase.from('categories').select(
-          '''
-          name, products(name, description, price)
-          '''
-        ),
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: supabase
+            .from('products')
+            .stream(primaryKey: ['id'])
+            .order('created_at'),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No Categories or Products"));
+            return const Center(child: Text("No Products Found"));
           }
 
-          final categories = snapshot.data!;
-
+          final products = snapshot.data!;
           return ListView.builder(
-            itemCount: categories.length,
+            itemCount: products.length,
             itemBuilder: (context, index) {
-              final category = categories[index];
-              final products = category['products'] as List;
-
-              // Agar kisi category mein products nahi hain toh use skip bhi kar sakte hain
-              if (products.isEmpty) return const SizedBox();
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Category Header
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      category['name'].toString().toUpperCase(),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-                    ),
+              final item = products[index];
+              final catName = getCategoryName(item['category_id']);
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  title: Text(
+                    item['name'],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  // Us Category ke Products ki List
-                  ...products.map((item) {
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      child: ListTile(
-                        leading: const Icon(Icons.shopping_bag_outlined),
-                        title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(item['description'] ?? ""),
-                        trailing: Text(
-                          "₹${item['price']}",
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
-                  }),
-                  const Divider(),
-                ],
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item['description']),
+                      Text(catName),
+                    ],
+                  ),
+                  leading : const Icon(Icons.shopping_bag_outlined),
+                  trailing: Text("₹ ${item['price'].toStringAsFixed(2)}"),
+                ),
               );
             },
           );

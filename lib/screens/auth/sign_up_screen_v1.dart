@@ -16,10 +16,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final nameCtr = TextEditingController();
   final emailCtr = TextEditingController();
-  final countryCtr = TextEditingController();
-  final cityCtr = TextEditingController();
-  final streetCtr = TextEditingController();
-  final pinCodeCtr = TextEditingController();
+  final addressCtr = TextEditingController();
   final phoneCtr = TextEditingController();
   final passwordCtr = TextEditingController();
   bool loading = false;
@@ -53,15 +50,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         await supabase.from('users').insert({
           'name': nameCtr.text.trim(),
           'email': emailCtr.text.trim().toLowerCase(),
+          'address': addressCtr.text.trim(),
           'phone': phoneCtr.text.trim(),
           'profile_pic': url,
-        });
-
-        await supabase.from('addresses').insert({
-          'country': countryCtr.text.trim(),
-          'city': cityCtr.text.trim(),
-          'street': streetCtr.text.trim(),
-          'pin_code': pinCodeCtr.text.trim(),
         });
 
         Navigator.pushAndRemoveUntil(
@@ -128,38 +119,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
             controller: nameCtr,
             decoration: InputDecoration(hintText: "Name"),
           ),
-          SizedBox(height: 12),
           TextFormField(
             controller: emailCtr,
             decoration: InputDecoration(hintText: "Email"),
           ),
-          SizedBox(height: 12),
           TextFormField(
-            controller: countryCtr,
-            decoration: InputDecoration(hintText: "Country"),
+            controller: addressCtr,
+            decoration: InputDecoration(hintText: "Address"),
           ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: cityCtr,
-            decoration: InputDecoration(hintText: "City"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: streetCtr,
-            decoration: InputDecoration(hintText: "Street"),
-          ),
-          SizedBox(height: 12),
-          TextFormField(
-            controller: pinCodeCtr,
-            maxLength: 6,
-            decoration: InputDecoration(hintText: "Pin Code"),
-          ),
-          SizedBox(height: 12),
           TextFormField(
             controller: phoneCtr,
             decoration: InputDecoration(hintText: "Phone"),
           ),
-          SizedBox(height: 12),
           TextFormField(
             controller: passwordCtr,
             decoration: InputDecoration(hintText: "Password"),
